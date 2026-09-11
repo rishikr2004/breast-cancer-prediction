@@ -131,7 +131,7 @@ The required feature names and their order are stored in `feature_names.json`.
 This project is deployed using Streamlit Community Cloud.
 
 - GitHub Repository: https://github.com/rishikr2004/breast-cancer-prediction
-- Live Application: Add your Streamlit deployment link here after deployment.
+- Live Application: https://breast-cancer-prediction-gyqhitz9sbgvhdz4kqxvfm.streamlit.app/
 
 ## Disclaimer
 
