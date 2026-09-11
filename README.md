@@ -2,7 +2,7 @@
 
 An interactive web application that predicts whether a breast tumour is likely **benign** or **malignant** using a neural-network model built with TensorFlow and Keras.
 
-> **Important:** This is an educational machine-learning project only. It is not a medical device and must not be used for medical diagnosis, treatment, or clinical decision-making.
+> **Important:** This is an educational deep-learning project only. It is not a medical device and must not be used for medical diagnosis, treatment, or clinical decision-making.
 
 ## Overview
 
