@@ -92,14 +92,6 @@ with tab_manual:
         "or click a quick-load button below, then hit **Predict**."
     )
 
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("Load a random *benign*-like example"):
-            st.session_state["_load"] = "benign"
-    with col2:
-        if st.button("Load a random *malignant*-like example"):
-            st.session_state["_load"] = "malignant"
-
     # Precompute quick-load example rows from the raw dataset (cached)
     @st.cache_data
     def example_rows():
@@ -110,12 +102,22 @@ with tab_manual:
         return benign_row, malignant_row
 
     benign_example, malignant_example = example_rows()
-    loaded = st.session_state.get("_load")
-    preset = None
-    if loaded == "benign":
-        preset = benign_example
-    elif loaded == "malignant":
-        preset = malignant_example
+
+    def apply_preset(preset_row):
+        # Overwrite each slider's stored value BEFORE the sliders are drawn
+        # this run, so clicking the button actually changes what's shown.
+        for col in feature_names:
+            lo = float(stats.loc[col, "min"])
+            hi = float(stats.loc[col, "max"])
+            st.session_state[f"slider_{col}"] = min(max(float(preset_row[col]), lo), hi)
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("Load a random *benign*-like example"):
+            apply_preset(benign_example)
+    with col2:
+        if st.button("Load a random *malignant*-like example"):
+            apply_preset(malignant_example)
 
     values = {}
     for group_name, cols in GROUPS.items():
@@ -123,18 +125,19 @@ with tab_manual:
             grid = st.columns(2)
             for i, col in enumerate(cols):
                 row = stats.loc[col]
-                default = float(preset[col]) if preset is not None else float(row["mean"])
                 lo = float(row["min"])
                 hi = float(row["max"])
                 step = (hi - lo) / 200 if hi > lo else 0.01
+                key = f"slider_{col}"
+                if key not in st.session_state:
+                    st.session_state[key] = float(row["mean"])
                 with grid[i % 2]:
                     values[col] = st.slider(
                         col.replace("_", " "),
                         min_value=lo,
                         max_value=hi,
-                        value=min(max(default, lo), hi),
                         step=step,
-                        key=f"slider_{col}",
+                        key=key,
                     )
 
     st.divider()
@@ -226,11 +229,11 @@ Input(30 features)
 - Early stopping on validation loss (patience = 10, best weights restored)
 
 ### Result on held-out test set
-96.5% test accuracy — see the training notebook for the full evaluation.
+~97% accuracy, AUC close to 1.0 — see the training notebook for the full
 confusion matrix, precision/recall, and ROC curve.
 
 ### Files
-- `notebook/brest_cancer_dl_project.ipynb` – original training notebook
+- `train.py` – reproduces the whole training pipeline
 - `breast_cancer_model.keras` – the trained network
 - `scaler.joblib` – the fitted `StandardScaler` (must be reused at inference time)
 - `feature_names.json` – exact column order the model expects
